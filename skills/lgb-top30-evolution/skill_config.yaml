@@ -1,0 +1,82 @@
+schema_version: 1
+skill_name: lgb-top30-evolution
+infrastructure_locked: true
+accepted_version: v000
+
+current:
+  version: v000
+  parent_version: null
+  split: validation
+  hypothesis_group: baseline
+  changed_groups:
+    - baseline
+  hypothesis: Baseline single LightGBM Top30 validation protocol.
+
+locked_boundaries:
+  data:
+    train_start: "2019-01-01"
+    train_end: "2024-07-30"
+    valid_start: "2024-08-01"
+    valid_end: "2025-08-30"
+    test_start: "2025-09-01"
+    test_end: "2026-05-30"
+    label:
+      horizon: 11
+      type: "Ref($vwap, -11) / Ref($vwap, -1) - 1"
+  model:
+    rolling:
+      purge_days: 11
+  backtest:
+    strategy:
+      topk: 30
+      rebalance_freq: "10d"
+    costs:
+      commission_rate: 0.0002
+      slippage: 0.001
+      stamp_tax: 0.0005
+  features:
+    base_features:
+      custom:
+        processing:
+          filter_st: true
+          filter_limit: false
+          filter_new_share: true
+  risk_control:
+    filters:
+      filter_st: true
+      filter_limit: true
+
+experiment:
+  model:
+    lgb_params_overlay: {}
+  features:
+    include: null
+    exclude: null
+    processing: {}
+  portfolio:
+    topk: 30
+    n_drop: 30
+    weight_method: mvo
+    mvo_optimizer: {}
+  exposure_constraints: {}
+  position_rule: {}
+
+baseline_metrics:
+  mean_rank_ic: 0.0
+  top30_sharpe: 0.0
+  max_drawdown: 0.0
+  avg_turnover: 0.0
+  industry_top5_excess: 0.0
+
+candidate_metrics:
+  mean_rank_ic: 0.0
+  top30_sharpe: 0.0
+  max_drawdown: 0.0
+  avg_turnover: 0.0
+  industry_top5_excess: 0.0
+
+paths:
+  latest_summary: latest_summary.json
+  results_tsv: results.tsv
+  versions_dir: versions
+  test_reviews_dir: test_reviews

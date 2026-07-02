@@ -1,0 +1,51 @@
+{
+  "version": "v000",
+  "parent_version": null,
+  "hypothesis_group": "baseline",
+  "hypothesis": "Baseline single LightGBM Top30 validation protocol.",
+  "decision_inputs": {
+    "baseline": {
+      "mean_rank_ic": 0.0,
+      "top30_sharpe": 0.0,
+      "max_drawdown": 0.0,
+      "avg_turnover": 0.0,
+      "industry_top5_excess": 0.0
+    },
+    "candidate": {
+      "mean_rank_ic": 0.0,
+      "top30_sharpe": 0.0,
+      "max_drawdown": 0.0,
+      "avg_turnover": 0.0,
+      "industry_top5_excess": 0.0
+    },
+    "deltas": {
+      "d_rankic": 0.0,
+      "d_top30_sharpe": 0.0,
+      "d_mdd": 0.0,
+      "d_turnover": 0.0,
+      "d_industry_excess": 0.0
+    }
+  },
+  "rule_result": {
+    "score_delta": 0.0,
+    "decision": "rollback",
+    "hard_gates": {
+      "passed": true,
+      "failed": []
+    }
+  },
+  "guard_result": {
+    "passed": true,
+    "violations": []
+  },
+  "decision": "rollback",
+  "config_hash": "e7cc2c23613d339e",
+  "code_hash": "4d525d26887477bc",
+  "data_snapshot": {},
+  "artifact_paths": {},
+  "log_tail_path": null,
+  "status": "evaluated",
+  "split": "validation",
+  "summary_path": "latest_summary.json",
+  "timestamp": "2026-07-02T08:28:54.231975+00:00"
+}
