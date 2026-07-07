@@ -1,35 +1,37 @@
 schema_version: 1
 skill_name: lgb-top30-evolution
 infrastructure_locked: true
-accepted_version: v000
-
+accepted_version: null
 current:
   version: v000
   parent_version: null
   split: validation
   hypothesis_group: baseline
   changed_groups:
-    - baseline
-  hypothesis: Baseline single LightGBM Top30 validation protocol.
-
+  - baseline
+  hypothesis: Initial pre-2026 market-similarity baseline; reserve 2026-01 through 2026-07 for manual OOT review.
 locked_boundaries:
+  rolling_model_start: 2025-01
+  rolling_model_end: 2026-07
+  oot_validation_start: '2025-01-01'
+  oot_validation_end: '2025-12-31'
+  test_review_start: '2026-01-01'
+  test_review_end: '2026-07-01'
   data:
-    train_start: "2019-01-01"
-    train_end: "2024-07-30"
-    valid_start: "2024-08-01"
-    valid_end: "2025-08-30"
-    test_start: "2025-09-01"
-    test_end: "2026-05-30"
     label:
       horizon: 11
-      type: "Ref($vwap, -11) / Ref($vwap, -1) - 1"
+      type: Ref($vwap, -11) / Ref($vwap, -1) - 1
   model:
     rolling:
       purge_days: 11
+    sample_weight:
+      method: market_similarity
+      market_similarity:
+        anchor_reference: split_start
   backtest:
     strategy:
       topk: 30
-      rebalance_freq: "10d"
+      rebalance_freq: 10d
     costs:
       commission_rate: 0.0002
       slippage: 0.001
@@ -45,7 +47,9 @@ locked_boundaries:
     filters:
       filter_st: true
       filter_limit: true
-
+  score_neutralization:
+    enabled: false
+    mode: always
 experiment:
   model:
     lgb_params_overlay: {}
@@ -60,21 +64,6 @@ experiment:
     mvo_optimizer: {}
   exposure_constraints: {}
   position_rule: {}
-
-baseline_metrics:
-  mean_rank_ic: 0.0
-  top30_sharpe: 0.0
-  max_drawdown: 0.0
-  avg_turnover: 0.0
-  industry_top5_excess: 0.0
-
-candidate_metrics:
-  mean_rank_ic: 0.0
-  top30_sharpe: 0.0
-  max_drawdown: 0.0
-  avg_turnover: 0.0
-  industry_top5_excess: 0.0
-
 paths:
   latest_summary: latest_summary.json
   results_tsv: results.tsv

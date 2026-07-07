@@ -19,25 +19,30 @@ def build_command(skill_config: dict, split: str, manual_review: bool) -> tuple[
     if split == "test" and not manual_review:
         raise GuardViolation("test split requires --manual-review and must not write results.tsv")
 
-    base_dir = Path(paths.get("test_reviews_dir", "test_reviews")) if split == "test" else Path(paths.get("versions_dir", "versions")) / version
-    if not base_dir.is_absolute():
-        base_dir = Path(__file__).resolve().parent / base_dir
-    base_dir.mkdir(parents=True, exist_ok=True)
+    skill_dir = Path(__file__).resolve().parent
+    versions_dir = Path(paths.get("versions_dir", "versions"))
+    if not versions_dir.is_absolute():
+        versions_dir = skill_dir / versions_dir
+    version_dir = versions_dir / version
+
+    review_dir = Path(paths.get("test_reviews_dir", "test_reviews"))
+    if not review_dir.is_absolute():
+        review_dir = skill_dir / review_dir
 
     model_path = current.get("model_path") or skill_config.get("artifact_paths", {}).get("model_path")
     if not model_path:
-        start_ym = str(skill_config.get("locked_boundaries", {}).get("data", {}).get("valid_start", "YYYY-MM"))[:7]
-        model_path = str(base_dir / "models" / f"lgb_{start_ym}.txt")
+        start_ym = str(skill_config.get("locked_boundaries", {}).get("rolling_model_start", "YYYY-MM"))
+        model_path = str(version_dir / "models" / f"lgb_{start_ym}.txt")
 
     locked = skill_config.get("locked_boundaries", {})
     if split == "test":
-        start_date = locked.get("data", {}).get("test_start")
-        end_date = locked.get("data", {}).get("test_end")
-        output_dir = base_dir / version
+        start_date = locked.get("test_review_start")
+        end_date = locked.get("test_review_end")
+        output_dir = review_dir / version
     else:
-        start_date = locked.get("data", {}).get("valid_start")
-        end_date = locked.get("data", {}).get("valid_end")
-        output_dir = base_dir / "oot_validation"
+        start_date = locked.get("oot_validation_start")
+        end_date = locked.get("oot_validation_end")
+        output_dir = version_dir / "oot_validation"
 
     command = [
         "/home/newalpi/miniforge3/envs/quant/bin/python",
@@ -45,7 +50,7 @@ def build_command(skill_config: dict, split: str, manual_review: bool) -> tuple[
         "--model",
         model_path,
         "--config",
-        str(base_dir / "runtime_config.yaml"),
+        str(version_dir / "runtime_config.yaml"),
         "--start-date",
         str(start_date),
         "--end-date",
@@ -69,8 +74,11 @@ def main() -> int:
     args = parser.parse_args()
 
     skill_config = load_yaml(args.skill_config)
-    guard_result = guard_result_or_errors(skill_config)
     command, output_dir = build_command(skill_config, args.split, args.manual_review)
+    guard_result = guard_result_or_errors(
+        skill_config,
+        run_context={"split": args.split, "manual_review": args.manual_review},
+    )
     summary = {
         "stage": "backtest",
         "version": skill_config.get("current", {}).get("version"),
